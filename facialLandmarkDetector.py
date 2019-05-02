@@ -2,13 +2,17 @@
 import dlib,cv2
 import numpy as np
 from renderFace import renderFace
+import json
 
 def writeLandmarksToFile(landmarks, landmarksFileName):
-  with open(landmarksFileName, 'w') as f:
-    for p in landmarks.parts():
-      f.write("%s %s\n" %(int(p.x),int(p.y)))
+    result = [{'x': p.x, 'y': p.y} for p in landmarks.parts()]
+    with open(landmarksFileName, 'w') as fout:
+        json.dump(result, fout, indent=2)
 
-  f.close()
+      # f.write("x: {}, y: {}\n".format(int(p.x), int(p.y)))
+      # f.write("%s %s\n" %(int(p.x),int(p.y)))
+
+    fout.close()
 
 # Landmark model location
 PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"
@@ -47,31 +51,31 @@ while 1:
   # For every face rectangle, run landmarkDetector
     landmarks = landmarkDetector(img, newRect)
 
-  # Print number of landmarks
-  if i==0:
-    print("Number of landmarks",len(landmarks.parts()))
+    # Print number of landmarks
+    if i==0:
+      print("Number of landmarks",len(landmarks.parts()))
 
-  # Store landmarks for current face
-  landmarksAll.append(landmarks)
+    # Store landmarks for current face
+    landmarksAll.append(landmarks)
 
-  # Draw landmarks on face
-  renderFace(img, landmarks)
+    # Draw landmarks on face
+    renderFace(img, landmarks)
 
-  landmarksFileName = landmarksBasename +"_"+ str(i)+ ".txt"
-  print("Saving landmarks to", landmarksFileName)
+    landmarksFileName = landmarksBasename +"_"+ str(i)+ ".json"
+    print("Saving landmarks to", landmarksFileName)
 
-  # Write landmarks to disk
-  writeLandmarksToFile(landmarks, landmarksFileName)
+    # Write landmarks to disk
+    writeLandmarksToFile(landmarks, landmarksFileName)
 
-  out.write(img)
+    out.write(img)
 
-  cv2.imshow("Facial Landmark detector", img)
+    cv2.imshow("Facial Landmark detector", img)
 
-  k= cv2.waitKey(10) & 0xff
-  if k==27:
-      break
+    k= cv2.waitKey(10) & 0xff
+    if k==27:
+        break
 
-      cap.release()
+        cap.release()
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
